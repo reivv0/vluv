@@ -8,7 +8,7 @@ UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Set the title of the app
-st.title("Daily Gallery")
+st.title("Halo! Selamat Datang di video Plupi XD")
 
 # File uploader
 uploaded_files = st.file_uploader("Upload Images or Videos", type=['jpg', 'jpeg', 'png', 'mp4', 'mov'], accept_multiple_files=True)
