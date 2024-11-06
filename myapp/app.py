@@ -1,39 +1,68 @@
 import os
 
-import pandas as pd
 import streamlit as st
 
 # Set the upload folder
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Set the title of the app
-st.title("Halo! Selamat Datang di video Plupi XD")
+# User authentication
+def login(username, password):
+    # Simple hardcoded user for demonstration
+    return username == "user" and password == "password"
 
-# File uploader
-uploaded_files = st.file_uploader("Upload Images or Videos", type=['jpg', 'jpeg', 'png', 'mp4', 'mov'], accept_multiple_files=True)
+# Streamlit app
+st.title("Daily Gallery")
 
-if uploaded_files:
-    for uploaded_file in uploaded_files:
-        # Save uploaded files to the upload folder
-        with open(os.path.join(UPLOAD_FOLDER, uploaded_file.name), "wb") as f:
-            f.write(uploaded_file.getbuffer())
+# Login form
+if 'logged_in' not in st.session_state:
+    st.session_state.logged_in = False
+
+if not st.session_state.logged_in:
+    st.subheader("Login")
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
     
-    st.success("Files uploaded successfully!")
-
-# Display uploaded files
-if os.listdir(UPLOAD_FOLDER):
-    st.subheader("Gallery")
-    for file in os.listdir(UPLOAD_FOLDER):
-        file_path = os.path.join(UPLOAD_FOLDER, file)
-        if file.endswith(('mp4', 'mov')):
-            st.video(file_path)
+    if st.button("Login"):
+        if login(username, password):
+            st.session_state.logged_in = True
+            st.success("Logged in successfully!")
         else:
-            st.image(file_path)
+            st.error("Invalid username or password.")
+else:
+    st.subheader("Upload Images or Videos")
+    uploaded_files = st.file_uploader("Choose files", type=['jpg', 'jpeg', 'png', 'mp4', 'mov'], accept_multiple_files=True)
+
+    if uploaded_files:
+        for uploaded_file in uploaded_files:
+            # Save uploaded files to the upload folder
+            with open(os.path.join(UPLOAD_FOLDER, uploaded_file.name), "wb") as f:
+                f.write(uploaded_file.getbuffer())
+        st.success("Files uploaded successfully!")
+
+    # Display uploaded files
+    if os.listdir(UPLOAD_FOLDER):
+        st.subheader("Gallery")
+        for file in os.listdir(UPLOAD_FOLDER):
+            file_path = os.path.join(UPLOAD_FOLDER, file)
+            if file.endswith(('mp4', 'mov')):
+                st.video(file_path)
+            else:
+                st.image(file_path)
+
+            # Delete file button
+            if st.button(f"Delete {file}"):
+                os.remove(file_path)
+                st.success(f"{file} deleted successfully!")
+                st.experimental_rerun()  # Refresh the app to update the gallery
+
+    # Logout button
+    if st.button("Logout"):
+        st.session_state.logged_in = False
+        st.success("Logged out successfully!")
 
 # Add custom CSS
 st.markdown(
-    """
     <style>
     body {
         background-color: #f4f4f4;
@@ -56,6 +85,6 @@ st.markdown(
         background-color: #45a049;
     }
     </style>
-    """,
+    ,
     unsafe_allow_html=True
 )
